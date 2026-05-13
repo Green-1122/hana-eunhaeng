@@ -7,6 +7,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const navLinks = [
   { to: "/", label: "Personal" },
@@ -43,6 +44,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <ThemeToggle />
           <Button asChild variant="ghost">
             <Link to="/login">Sign in</Link>
           </Button>
@@ -51,30 +53,33 @@ export function SiteHeader() {
           </Button>
         </div>
 
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-72">
-            <div className="mt-8 flex flex-col gap-4">
-              {navLinks.map((l) => (
-                <a key={l.label} href="#features" className="text-base font-medium">
-                  {l.label}
-                </a>
-              ))}
-              <div className="mt-4 flex flex-col gap-2">
-                <Button asChild variant="outline">
-                  <Link to="/login" onClick={() => setOpen(false)}>Sign in</Link>
-                </Button>
-                <Button asChild>
-                  <Link to="/signup" onClick={() => setOpen(false)}>Open an account</Link>
-                </Button>
+        <div className="flex items-center gap-1 md:hidden">
+          <ThemeToggle />
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Open menu">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <div className="mt-8 flex flex-col gap-4">
+                {navLinks.map((l) => (
+                  <a key={l.label} href="#features" className="text-base font-medium">
+                    {l.label}
+                  </a>
+                ))}
+                <div className="mt-4 flex flex-col gap-2">
+                  <Button asChild variant="outline">
+                    <Link to="/login" onClick={() => setOpen(false)}>Sign in</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link to="/signup" onClick={() => setOpen(false)}>Open an account</Link>
+                  </Button>
+                </div>
               </div>
-            </div>
-          </SheetContent>
-        </Sheet>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   );
