@@ -80,24 +80,6 @@ export function SiteHeader() {
             </SheetContent>
           </Sheet>
         </div>
-          <SheetContent side="right" className="w-72">
-            <div className="mt-8 flex flex-col gap-4">
-              {navLinks.map((l) => (
-                <a key={l.label} href="#features" className="text-base font-medium">
-                  {l.label}
-                </a>
-              ))}
-              <div className="mt-4 flex flex-col gap-2">
-                <Button asChild variant="outline">
-                  <Link to="/login" onClick={() => setOpen(false)}>Sign in</Link>
-                </Button>
-                <Button asChild>
-                  <Link to="/signup" onClick={() => setOpen(false)}>Open an account</Link>
-                </Button>
-              </div>
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
     </header>
   );
