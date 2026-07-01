@@ -1,26 +1,27 @@
 <?php
 /**
  * Base Model Class
- * All models extend this class
  */
 
 namespace App\Core;
 
-use App\Core\Database;
+use PDO;
 
-abstract class Model
+class Model
 {
     protected string $table = '';
-    protected array $attributes = [];
-    protected array $fillable = [];
-    protected array $hidden = [];
+    protected array $data = [];
+    protected ?string $orderBy = null;
+    protected ?int $limitValue = null;
+    protected ?int $offsetValue = null;
 
     /**
-     * Constructor
+     * Find by ID
      */
-    public function __construct(array $attributes = [])
+    public static function find(int $id): ?static
     {
-        $this->attributes = $attributes;
+        $query = new static();
+        return $query->where('id', $id)->first();
     }
 
     /**
@@ -28,129 +29,100 @@ abstract class Model
      */
     public static function all(): array
     {
-        $table = (new static())->table;
-        return Database::query("SELECT * FROM `$table`") ?: [];
-    }
-
-    /**
-     * Find by ID
-     */
-    public static function find(int $id): ?self
-    {
-        $instance = new static();
-        $result = Database::queryOne(
-            "SELECT * FROM `{$instance->table}` WHERE `id` = ?",
-            [$id]
-        );
-
-        return $result ? new static($result) : null;
-    }
-
-    /**
-     * Find by attribute
-     */
-    public static function findBy(string $column, mixed $value): ?self
-    {
-        $instance = new static();
-        $result = Database::queryOne(
-            "SELECT * FROM `{$instance->table}` WHERE `$column` = ?",
-            [$value]
-        );
-
-        return $result ? new static($result) : null;
+        return (new static())->get();
     }
 
     /**
      * Where clause
      */
-    public static function where(string $column, mixed $value): array
+    public function where(string $column, mixed $value): static
     {
-        $instance = new static();
-        $results = Database::query(
-            "SELECT * FROM `{$instance->table}` WHERE `$column` = ?",
-            [$value]
-        );
-
-        return array_map(fn($row) => new static($row), $results ?: []);
+        // Implement where logic
+        return $this;
     }
 
     /**
-     * Create new record
+     * Get first record
      */
-    public static function create(array $data): ?self
+    public function first(): ?array
     {
-        $instance = new static();
-        $filtered = array_intersect_key($data, array_flip($instance->fillable));
-        
-        $id = Database::insert($instance->table, $filtered);
-        
-        return $id ? static::find($id) : null;
+        $result = $this->get();
+        return $result[0] ?? null;
     }
 
     /**
-     * Update record
+     * Get all records
      */
-    public function update(array $data): bool
+    public function get(): array
     {
-        $filtered = array_intersect_key($data, array_flip($this->fillable));
-        
-        if (Database::update($this->table, $filtered, ['id' => $this->id])) {
-            $this->attributes = array_merge($this->attributes, $filtered);
-            return true;
-        }
-
-        return false;
+        $sql = "SELECT * FROM `{$this->table}`";
+        return Database::query($sql) ?? [];
     }
 
     /**
-     * Delete record
+     * Order by
      */
-    public function delete(): bool
+    public function orderBy(string $column, string $direction = 'ASC'): static
     {
-        return Database::delete($this->table, ['id' => $this->id]);
+        $this->orderBy = "$column $direction";
+        return $this;
     }
 
     /**
-     * Get attribute
+     * Limit records
+     */
+    public function limit(int $value): static
+    {
+        $this->limitValue = $value;
+        return $this;
+    }
+
+    /**
+     * Offset records
+     */
+    public function offset(int $value): static
+    {
+        $this->offsetValue = $value;
+        return $this;
+    }
+
+    /**
+     * Insert data
+     */
+    public static function insert(array $data): int|false
+    {
+        return Database::insert((new static())->table, $data);
+    }
+
+    /**
+     * Update data
+     */
+    public static function update(array $data, array $where): bool
+    {
+        return Database::update((new static())->table, $data, $where);
+    }
+
+    /**
+     * Delete data
+     */
+    public static function delete(array $where): bool
+    {
+        return Database::delete((new static())->table, $where);
+    }
+
+    /**
+     * Magic getter
      */
     public function __get(string $name): mixed
     {
-        return $this->attributes[$name] ?? null;
+        return $this->data[$name] ?? null;
     }
 
     /**
-     * Set attribute
+     * Magic setter
      */
     public function __set(string $name, mixed $value): void
     {
-        $this->attributes[$name] = $value;
-    }
-
-    /**
-     * Check if attribute exists
-     */
-    public function __isset(string $name): bool
-    {
-        return isset($this->attributes[$name]);
-    }
-
-    /**
-     * Convert to array
-     */
-    public function toArray(): array
-    {
-        $array = $this->attributes;
-        foreach ($this->hidden as $field) {
-            unset($array[$field]);
-        }
-        return $array;
-    }
-
-    /**
-     * Convert to JSON
-     */
-    public function toJson(): string
-    {
-        return json_encode($this->toArray());
+        $this->data[$name] = $value;
     }
 }
