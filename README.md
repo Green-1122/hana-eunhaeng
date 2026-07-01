@@ -1,124 +1,88 @@
-# 🏦 Hana-Eunhaeng - Production-Grade Fintech Banking Platform
+# Hana-Eunhaeng Banking Platform
 
-**A full-stack, enterprise-ready online banking system built with Pure PHP 8+, MySQL, and modern web technologies.**
+## Production-Grade Fintech Online Banking Platform
 
-[![Status](https://img.shields.io/badge/Status-Active%20Development-blue)]()
-[![PHP Version](https://img.shields.io/badge/PHP-8.0%2B-blueviolet)]()
-[![License](https://img.shields.io/badge/License-MIT-green)]()
+Hana-Eunhaeng is a **premium, full-stack fintech banking platform** built with **Pure PHP 8+, MySQL, HTML5, CSS3, and Vanilla JavaScript**. It delivers enterprise-ready features with a modern, intuitive interface inspired by leading digital banking platforms.
 
-## 🎯 Overview
+### ✨ Features
 
-Hana-Eunhaeng is a **production-grade, full-stack fintech platform** designed to deliver a premium banking experience comparable to Chase, Capital One, Robinhood, and SoFi. Built entirely with:
+#### Core Banking
+- 🏦 **Multiple Account Types** - Checking, Savings, Money Market, CDs
+- 💳 **Digital Cards** - Debit, Credit, and Prepaid with full management
+- 💸 **Transfers & Payments** - Instant internal and external transfers
+- 📊 **Transaction History** - Complete audit trail with filtering and export
+- 📈 **Account Analytics** - Real-time balance tracking and insights
 
-- **Pure PHP 8+** (OOP architecture, no frameworks needed)
-- **MySQL 8.0+** (optimized schema with 15+ tables)
-- **HTML5 + CSS3** (Tailwind CSS)
-- **Vanilla JavaScript** (lightweight, performant)
-- **PDO Prepared Statements** (security first)
+#### Security & Compliance
+- 🔐 **Bank-Level Encryption** - AES-256 for sensitive data
+- 🔑 **Two-Factor Authentication** - Email and SMS support
+- ✅ **PCI DSS Compliance** - Card data security standards
+- 📝 **Audit Logging** - Complete activity tracking
+- 🛡️ **CSRF Protection** - Token-based request validation
 
-## ✨ Core Features
+#### User Management
+- 👤 **User Profiles** - Comprehensive profile management
+- 🔒 **Password Security** - bcrypt hashing with configurable rounds
+- 📧 **Email Verification** - Secure email validation
+- ⏱️ **Session Management** - Configurable session timeouts
+- 🚪 **Login History** - Track user access patterns
 
-### 🔐 Security First
-- ✅ **Password Hashing** (bcrypt/argon2)
-- ✅ **Two-Factor Authentication** (SMS, Email, Authenticator)
-- ✅ **Encrypted Storage** (sensitive data)
-- ✅ **Rate Limiting** (prevent brute force)
-- ✅ **CSRF Protection** (token-based)
-- ✅ **SQL Injection Prevention** (prepared statements)
-- ✅ **Session Management** (secure cookies)
-- ✅ **Audit Logging** (complete activity tracking)
-- ✅ **Fraud Detection** (anomaly alerts)
+#### Admin & Analytics
+- 📊 **Dashboard Analytics** - Real-time financial insights
+- 📋 **Transaction Reports** - Detailed transaction analysis
+- 👥 **User Management** - Admin controls for user accounts
+- 🔍 **Audit Trail** - Security event logging
+- 💹 **Financial Reporting** - Balance sheets and statements
 
-### 💰 Banking Features
-- ✅ **Multiple Account Types** (Checking, Savings, Money Market, CD)
-- ✅ **Debit/Credit Cards** (management, limits, controls)
-- ✅ **Transactions** (full history, filtering, export)
-- ✅ **Internal Transfers** (between own accounts)
-- ✅ **External Transfers** (ACH, Wire, International)
-- ✅ **Bill Pay** (recurring, one-time, scheduled)
-- ✅ **Recurring Payments** (automated, flexible frequency)
-- ✅ **Loan Management** (personal, mortgage, auto, student)
-- ✅ **Recipients** (saved, verified, favorites)
-- ✅ **Interest Calculation** (automated posting)
-- ✅ **Overdraft Protection** (configurable)
-
-### 📊 Analytics & Reporting
-- ✅ **Dashboard Overview** (balance, accounts, cards)
-- ✅ **Transaction Analytics** (charts, trends)
-- ✅ **Spending Insights** (by category, merchant)
-- ✅ **Financial Goals** (tracking, progress)
-- ✅ **PDF Statements** (monthly, quarterly, annual)
-- ✅ **Data Export** (CSV, Excel)
-
-### 🎨 Premium UI/UX
-- ✅ **Modern Design System** (glassmorphism, gradients)
-- ✅ **Dark/Light Mode** (theme toggle)
-- ✅ **Responsive Design** (mobile-first)
-- ✅ **Accessibility** (WCAG 2.1 AA)
-- ✅ **Micro Interactions** (smooth transitions)
-- ✅ **Financial Education** (tooltips, explanations)
-- ✅ **Notification Center** (in-app, email, SMS)
-
-### ⚙️ Administration
-- ✅ **User Management** (create, edit, suspend, monitor)
-- ✅ **KYC Verification** (Know Your Customer)
-- ✅ **AML Screening** (Anti-Money Laundering)
-- ✅ **Transaction Monitoring** (fraud detection)
-- ✅ **Audit Dashboard** (complete activity log)
-- ✅ **System Settings** (configurable)
-
-## 🏗️ Architecture
+### 🏗️ Architecture
 
 ```
 hana-eunhaeng/
-├── public/                      # Web root
-│   ├── index.php               # Single entry point
-│   └── assets/
-│       ├── css/
-│       ├── js/
-│       └── images/
 ├── app/
-│   ├── config/                 # Configuration
-│   ├── core/                   # Framework base classes
-│   ├── middleware/             # Request middleware
-│   ├── controllers/            # Business logic
-│   ├── models/                 # Data models
-│   ├── helpers/                # Utility functions
-│   └── views/                  # Templates
-├── database/
-│   ├── schema.sql              # Database schema
-│   └── seeds.sql               # Sample data
-├── tests/                      # Unit & integration tests
-├── .env.example                # Environment template
-├── composer.json               # Dependencies
-└── README.md
+│   ├── config/           # Configuration files
+│   ├── controllers/      # Request handlers
+│   ├── models/          # Data models
+│   ├── views/           # Template files
+│   ├── middleware/      # Request middleware
+│   ├── helpers/         # Utility functions
+│   └── core/            # Framework core
+├── public/              # Web root
+│   ├── index.php        # Entry point
+│   ├── css/             # Stylesheets
+│   ├── js/              # JavaScript files
+│   └── assets/          # Images and fonts
+├── database/            # Database schema
+├── storage/             # Logs and uploads
+└── docs/                # Documentation
 ```
 
-## 🚀 Getting Started
+### 🚀 Quick Start
 
-### Prerequisites
-- PHP 8.0 or higher
-- MySQL 8.0 or higher
-- Composer
-- Web server (Apache/Nginx)
+#### Requirements
+- PHP 8.0+
+- MySQL 5.7+
+- Apache with mod_rewrite
+- Composer (optional)
 
-### Installation
+#### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/hana-eunhaeng.git
+   git clone https://github.com/Green-1122/hana-eunhaeng.git
    cd hana-eunhaeng
    ```
 
-2. **Install dependencies**
+2. **Copy environment configuration**
    ```bash
-   composer install
+   cp app/config/.env.example app/config/.env
    ```
 
-3. **Setup environment**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
+3. **Update .env with your database credentials**
+   ```
+   DB_HOST=localhost
+   DB_NAME=hana_eunhaeng
+   DB_USER=root
+   DB_PASS=your_password
    ```
 
 4. **Create database**
@@ -126,132 +90,134 @@ hana-eunhaeng/
    mysql -u root -p < database/schema.sql
    ```
 
-5. **Run the application**
+5. **Set file permissions**
    ```bash
-   php -S localhost:8000 -t public
+   chmod -R 755 storage/
+   chmod 644 public/.htaccess
    ```
 
-   Access at `http://localhost:8000`
+6. **Start development server**
+   ```bash
+   php -S localhost:8000 -t public/
+   ```
 
-## 📋 Database Schema
+7. **Access the application**
+   - Navigate to `http://localhost:8000`
+   - Register a new account
+   - Login and explore
 
-**15+ Core Tables:**
-- `he_users` - User accounts & profiles
-- `he_accounts` - Bank accounts (Checking, Savings, etc)
-- `he_cards` - Debit/Credit cards
-- `he_transactions` - Transaction history
-- `he_recipients` - Saved transfer recipients
-- `he_recurring_transfers` - Automated payments
-- `he_loans` - Loan products
-- `he_bills` - Bill management
-- `he_login_history` - Login tracking
-- `he_audit_log` - Complete audit trail
-- `he_fraud_alerts` - Suspicious activity
-- `he_notifications` - User notifications
-- `he_notification_preferences` - Notification settings
-- `he_support_tickets` - Customer support
-- `he_admin_users` - Admin accounts
+### 📚 API Endpoints
 
-**Key Features:**
-- Full normalization (3NF)
-- Comprehensive indexing
-- Foreign key constraints
-- Views for common queries
-- JSON support for flexible data
-- Soft deletes where needed
+#### Authentication
+- `POST /auth/login` - User login
+- `POST /auth/register` - User registration
+- `GET /auth/logout` - User logout
+- `POST /auth/forgot-password` - Password reset
 
-## 🔑 Key Technologies
+#### Dashboard
+- `GET /dashboard` - Main dashboard
+- `GET /dashboard/profile` - User profile
+- `POST /dashboard/profile` - Update profile
+- `GET /dashboard/settings` - Account settings
 
-| Component | Technology |
-|-----------|------------|
-| Backend | Pure PHP 8+ (OOP) |
-| Database | MySQL 8.0+ |
-| Frontend | HTML5, CSS3, Vanilla JS |
-| Styling | Tailwind CSS |
-| Charts | Chart.js |
-| Email | PHPMailer |
-| PDF | TCPDF/mPDF |
-| Auth | bcrypt/Argon2 |
-| Sessions | PHP Session with Redis support |
+#### Accounts
+- `GET /accounts/list` - List all accounts
+- `GET /accounts/view?id={id}` - View account details
+- `GET /accounts/create` - Account creation form
+- `POST /accounts/store` - Create new account
 
-## 🔒 Security Features
+#### Transactions
+- `GET /transactions/history` - Transaction history
+- `GET /transactions/view?id={id}` - Transaction details
+- `GET /transactions/transfer` - Transfer form
+- `POST /transactions/process-transfer` - Process transfer
 
-- **HTTPS/TLS** - All data encrypted in transit
-- **CSRF Tokens** - Token-based CSRF protection
-- **Rate Limiting** - Per-IP request throttling
-- **SQL Injection Prevention** - Prepared statements only
-- **XSS Protection** - Output escaping, CSP headers
-- **CORS** - Configurable cross-origin rules
-- **2FA** - Multiple authentication methods
-- **Session Security** - HttpOnly, Secure, SameSite flags
-- **Password Policy** - Minimum complexity requirements
-- **Data Encryption** - Sensitive fields encrypted
+### 🎨 UI/UX Features
 
-## 📱 Responsive Design
+#### Design System
+- **Color Palette** - Professional blues, greens, and neutrals
+- **Typography** - Clear hierarchy with modern fonts
+- **Spacing** - Consistent 8px grid system
+- **Shadows** - Depth through subtle shadows
+- **Animations** - Smooth transitions and interactions
 
-- Mobile-first approach
-- Tailwind CSS breakpoints
-- Touch-friendly interfaces
-- Optimized for phones, tablets, desktops
-- Progressive enhancement
+#### Responsive Design
+- 📱 Mobile-first approach
+- 💻 Desktop optimization
+- 🎯 Touch-friendly interactions
+- 📏 Flexible layouts
 
-## 🎓 Financial Education
+#### Accessibility
+- ♿ WCAG 2.1 AA compliance
+- ⌨️ Keyboard navigation
+- 👁️ High contrast support
+- 🔊 Screen reader friendly
 
-- In-app tooltips explaining features
-- "Why this matters" sections
-- Educational resources
-- Best practices for banking
-- Fee explanations
+### 🔒 Security Best Practices
 
-## 📊 API Documentation
+- **HTTPS Only** - All connections encrypted
+- **CSRF Tokens** - Request validation
+- **SQL Injection Protection** - Prepared statements
+- **XSS Prevention** - Input sanitization
+- **Rate Limiting** - Brute force protection
+- **Session Security** - HTTPOnly cookies
+- **Password Hashing** - bcrypt with salt
+- **Audit Logging** - Security event tracking
 
-Full RESTful API with documentation:
-- Authentication endpoints
-- Account management
-- Transaction handling
-- Transfer operations
-- Bill pay
-- Loan management
+### 📊 Database Schema
 
-## 🧪 Testing
+Key tables:
+- `users` - User accounts and profiles
+- `accounts` - Bank accounts
+- `cards` - Debit/credit cards
+- `transactions` - Transaction history
+- `transfers` - Money transfers
+- `beneficiaries` - Saved recipients
+- `loans` - Loan accounts
+- `bills` - Bill payments
+- `notifications` - User notifications
+- `audit_logs` - Activity logging
+- `security_events` - Security tracking
+
+### 🧪 Testing
 
 ```bash
-# Run unit tests
-phpunit
-
-# Run code analysis
-phpstan analyse
-
-# Check code style
-phpcs app/
+# Test credentials
+Email: demo@hana-eunhaeng.local
+Password: DemoPassword123!
 ```
 
-## 📝 License
+### 📖 Documentation
 
-MIT License - see LICENSE file for details
+- [Installation Guide](docs/INSTALL.md)
+- [API Documentation](docs/API.md)
+- [Database Schema](docs/DATABASE.md)
+- [Security Guide](docs/SECURITY.md)
+- [Contributing](CONTRIBUTING.md)
 
-## 🤝 Contributing
+### 📝 License
 
-Contributions welcome! Please read CONTRIBUTING.md first.
+MIT License - see LICENSE.md
 
-## 📞 Support
+### 👥 Contributing
 
-For issues and questions:
-- GitHub Issues
-- Email: support@hana-eunhaeng.com
-- Documentation: /docs
+Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
-## 🗺️ Roadmap
+### 📞 Support
 
-- [ ] Mobile app (React Native)
-- [ ] Crypto wallet integration
-- [ ] AI-powered financial advisor
-- [ ] Real-time notifications
-- [ ] Multi-currency support
-- [ ] Investment platform
-- [ ] Insurance products
-- [ ] API marketplace
+For issues, questions, or suggestions:
+- Open an issue on GitHub
+- Email: support@hana-eunhaeng.local
+- Documentation: https://docs.hana-eunhaeng.local
+
+### 🙏 Acknowledgments
+
+Inspired by leading fintech platforms:
+- Chase Bank
+- Capital One
+- Robinhood
+- SoFi
 
 ---
 
-**Built with ❤️ by Green-1122**
+**Build with ❤️ for modern banking**
