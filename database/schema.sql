@@ -1,519 +1,295 @@
--- Hana-Eunhaeng Banking Platform - Complete Database Schema
--- Production-Grade Fintech Database Design
--- MySQL 8.0+
+-- Hana-Eunhaeng Database Schema
+-- Production-grade fintech banking platform
 
--- ============================================================================
--- USERS TABLE - Core user information
--- ============================================================================
-CREATE TABLE IF NOT EXISTS `he_users` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `username` VARCHAR(50) NOT NULL UNIQUE,
-  `email` VARCHAR(255) NOT NULL UNIQUE,
-  `phone` VARCHAR(20) UNIQUE,
-  `password_hash` VARCHAR(255) NOT NULL,
+CREATE DATABASE IF NOT EXISTS `hana_eunhaeng` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `hana_eunhaeng`;
+
+-- Users table
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
   `first_name` VARCHAR(100) NOT NULL,
   `last_name` VARCHAR(100) NOT NULL,
-  `date_of_birth` DATE NOT NULL,
-  `ssn_hash` VARCHAR(255) NOT NULL UNIQUE,
-  `gender` ENUM('M', 'F', 'Other', 'Prefer Not to Say') DEFAULT 'Prefer Not to Say',
-  `address_street` VARCHAR(255),
-  `address_city` VARCHAR(100),
-  `address_state` VARCHAR(50),
-  `address_zip` VARCHAR(20),
-  `address_country` VARCHAR(100),
-  `occupation` VARCHAR(100),
-  `employment_status` ENUM('Employed', 'Self-Employed', 'Retired', 'Student', 'Unemployed') DEFAULT 'Employed',
-  `annual_income` DECIMAL(15, 2),
-  `profile_picture` VARCHAR(255),
-  `bio` TEXT,
-  `preferred_language` VARCHAR(10) DEFAULT 'en',
-  `timezone` VARCHAR(50) DEFAULT 'UTC',
-  `status` ENUM('Active', 'Inactive', 'Suspended', 'Closed') DEFAULT 'Active',
-  `kyc_status` ENUM('Pending', 'Verified', 'Rejected') DEFAULT 'Pending',
-  `kyc_verified_at` TIMESTAMP NULL,
-  `aml_status` ENUM('Clear', 'Flagged', 'Review') DEFAULT 'Clear',
+  `email` VARCHAR(255) UNIQUE NOT NULL,
+  `phone` VARCHAR(20),
+  `password_hash` VARCHAR(255) NOT NULL,
+  `ssn` VARCHAR(20),
+  `date_of_birth` DATE,
+  `address` VARCHAR(255),
+  `city` VARCHAR(100),
+  `state` VARCHAR(50),
+  `zip_code` VARCHAR(10),
+  `country` VARCHAR(100),
+  `account_type` ENUM('personal', 'business', 'student', 'senior') DEFAULT 'personal',
+  `employment_status` VARCHAR(50),
+  `annual_income` DECIMAL(12, 2),
+  `identity_verified` BOOLEAN DEFAULT FALSE,
   `email_verified_at` TIMESTAMP NULL,
-  `phone_verified_at` TIMESTAMP NULL,
   `two_factor_enabled` BOOLEAN DEFAULT FALSE,
-  `two_factor_method` ENUM('SMS', 'Email', 'Authenticator') DEFAULT 'SMS',
   `two_factor_secret` VARCHAR(255),
   `last_login_at` TIMESTAMP NULL,
-  `last_login_ip` VARCHAR(45),
-  `last_login_device` VARCHAR(255),
-  `failed_login_attempts` INT DEFAULT 0,
+  `login_attempts` INT DEFAULT 0,
   `locked_until` TIMESTAMP NULL,
+  `status` ENUM('active', 'suspended', 'closed', 'pending') DEFAULT 'pending',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `deleted_at` TIMESTAMP NULL,
-  
-  INDEX idx_email (`email`),
-  INDEX idx_username (`username`),
-  INDEX idx_status (`status`),
-  INDEX idx_kyc_status (`kyc_status`),
-  INDEX idx_created_at (`created_at`),
-  FULLTEXT INDEX ft_name (`first_name`, `last_name`)
+  KEY `idx_email` (`email`),
+  KEY `idx_status` (`status`),
+  KEY `idx_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- ACCOUNTS TABLE - User bank accounts
--- ============================================================================
-CREATE TABLE IF NOT EXISTS `he_accounts` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL,
-  `account_number` VARCHAR(20) NOT NULL UNIQUE,
-  `account_type` ENUM('Checking', 'Savings', 'Money Market', 'Certificate of Deposit') DEFAULT 'Checking',
-  `account_name` VARCHAR(100) NOT NULL,
+-- Accounts table
+CREATE TABLE IF NOT EXISTS `accounts` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `account_number` VARCHAR(20) UNIQUE NOT NULL,
+  `account_type` ENUM('checking', 'savings', 'money_market', 'cd') DEFAULT 'checking',
+  `account_name` VARCHAR(100),
+  `balance` DECIMAL(15, 2) DEFAULT 0,
+  `available_balance` DECIMAL(15, 2) DEFAULT 0,
   `currency` VARCHAR(3) DEFAULT 'USD',
-  `balance` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
-  `available_balance` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
-  `pending_balance` DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
-  `interest_rate` DECIMAL(5, 4) DEFAULT 0.0000,
-  `last_interest_posted_at` TIMESTAMP NULL,
-  `overdraft_limit` DECIMAL(15, 2) DEFAULT 0.00,
-  `overdraft_protection_enabled` BOOLEAN DEFAULT FALSE,
-  `min_balance_required` DECIMAL(15, 2) DEFAULT 0.00,
-  `monthly_fee` DECIMAL(10, 2) DEFAULT 0.00,
+  `interest_rate` DECIMAL(5, 3) DEFAULT 0,
+  `status` ENUM('active', 'frozen', 'closed', 'pending') DEFAULT 'active',
+  `opening_date` DATE,
+  `closing_date` DATE,
+  `pin` VARCHAR(255),
   `is_primary` BOOLEAN DEFAULT FALSE,
-  `is_locked` BOOLEAN DEFAULT FALSE,
-  `locked_reason` VARCHAR(255),
-  `status` ENUM('Active', 'Frozen', 'Closed', 'Dormant') DEFAULT 'Active',
-  `opened_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `closed_at` TIMESTAMP NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE,
-  INDEX idx_user_id (`user_id`),
-  INDEX idx_account_number (`account_number`),
-  INDEX idx_status (`status`),
-  UNIQUE INDEX idx_user_primary (`user_id`, `is_primary`)
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_account_number` (`account_number`),
+  KEY `idx_status` (`status`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- CARDS TABLE - Debit and credit cards
--- ============================================================================
-CREATE TABLE IF NOT EXISTS `he_cards` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL,
-  `account_id` BIGINT UNSIGNED NOT NULL,
-  `card_number_hash` VARCHAR(255) NOT NULL UNIQUE,
-  `card_token` VARCHAR(255) UNIQUE,
-  `card_type` ENUM('Debit', 'Credit', 'Prepaid') DEFAULT 'Debit',
-  `card_brand` ENUM('Visa', 'Mastercard', 'American Express', 'Discover') NOT NULL,
-  `card_name` VARCHAR(100),
-  `cardholder_name` VARCHAR(100) NOT NULL,
-  `expiry_month` INT NOT NULL,
-  `expiry_year` INT NOT NULL,
-  `cvv_hash` VARCHAR(255) NOT NULL,
-  `last_four` VARCHAR(4) NOT NULL,
-  `card_status` ENUM('Active', 'Blocked', 'Expired', 'Inactive') DEFAULT 'Active',
-  `is_primary` BOOLEAN DEFAULT FALSE,
-  `daily_limit` DECIMAL(15, 2) DEFAULT 5000.00,
-  `monthly_limit` DECIMAL(15, 2) DEFAULT 50000.00,
-  `is_contactless_enabled` BOOLEAN DEFAULT TRUE,
-  `is_international_enabled` BOOLEAN DEFAULT TRUE,
-  `is_online_shopping_enabled` BOOLEAN DEFAULT TRUE,
-  `is_atm_enabled` BOOLEAN DEFAULT TRUE,
-  `physical_card_delivered` BOOLEAN DEFAULT FALSE,
-  `delivered_at` TIMESTAMP NULL,
-  `issued_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `activated_at` TIMESTAMP NULL,
+-- Cards table
+CREATE TABLE IF NOT EXISTS `cards` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `account_id` INT,
+  `card_number` VARCHAR(19) UNIQUE NOT NULL,
+  `card_type` ENUM('debit', 'credit', 'prepaid') DEFAULT 'debit',
+  `card_brand` ENUM('visa', 'mastercard', 'amex', 'discover') DEFAULT 'visa',
+  `holder_name` VARCHAR(100),
+  `expiry_month` INT,
+  `expiry_year` INT,
+  `cvv_hash` VARCHAR(255),
+  `status` ENUM('active', 'locked', 'expired', 'closed') DEFAULT 'active',
+  `daily_limit` DECIMAL(10, 2),
+  `international_enabled` BOOLEAN DEFAULT FALSE,
+  `online_enabled` BOOLEAN DEFAULT TRUE,
+  `contactless_enabled` BOOLEAN DEFAULT TRUE,
+  `issued_date` DATE,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`account_id`) REFERENCES `he_accounts`(`id`) ON DELETE CASCADE,
-  INDEX idx_user_id (`user_id`),
-  INDEX idx_account_id (`account_id`),
-  INDEX idx_card_status (`card_status`),
-  INDEX idx_expiry (`expiry_year`, `expiry_month`)
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_card_number` (`card_number`),
+  KEY `idx_status` (`status`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- TRANSACTIONS TABLE - All account transactions
--- ============================================================================
-CREATE TABLE IF NOT EXISTS `he_transactions` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `account_id` BIGINT UNSIGNED NOT NULL,
-  `transaction_type` ENUM('Deposit', 'Withdrawal', 'Transfer', 'Payment', 'Fee', 'Interest', 'Dividend', 'Refund') NOT NULL,
-  `transaction_method` ENUM('ATM', 'Online Transfer', 'Mobile App', 'Card', 'Check', 'ACH', 'Wire', 'Crypto') DEFAULT 'Online Transfer',
+-- Transactions table
+CREATE TABLE IF NOT EXISTS `transactions` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `account_id` INT NOT NULL,
+  `card_id` INT,
+  `transaction_type` ENUM('deposit', 'withdrawal', 'transfer', 'payment', 'fee', 'interest') DEFAULT 'transfer',
   `amount` DECIMAL(15, 2) NOT NULL,
   `currency` VARCHAR(3) DEFAULT 'USD',
   `description` VARCHAR(255),
-  `reference_number` VARCHAR(50) UNIQUE,
-  `status` ENUM('Pending', 'Processing', 'Completed', 'Failed', 'Reversed', 'On Hold') DEFAULT 'Pending',
-  `merchant_name` VARCHAR(255),
+  `merchant_name` VARCHAR(100),
   `merchant_category` VARCHAR(100),
-  `counterparty_account_number` VARCHAR(20),
-  `counterparty_bank` VARCHAR(255),
-  `counterparty_name` VARCHAR(255),
-  `notes` TEXT,
-  `tags` VARCHAR(255),
-  `is_recurring` BOOLEAN DEFAULT FALSE,
-  `recurring_id` BIGINT UNSIGNED,
-  `fee_applied` DECIMAL(10, 2) DEFAULT 0.00,
-  `exchange_rate` DECIMAL(10, 6),
-  `original_amount` DECIMAL(15, 2),
-  `original_currency` VARCHAR(3),
+  `reference_number` VARCHAR(50) UNIQUE,
+  `status` ENUM('pending', 'completed', 'failed', 'reversed') DEFAULT 'pending',
+  `failure_reason` VARCHAR(255),
   `balance_after` DECIMAL(15, 2),
-  `card_id` BIGINT UNSIGNED,
-  `recipient_id` BIGINT UNSIGNED,
-  `initiated_by_user_id` BIGINT UNSIGNED,
-  `approved_by_user_id` BIGINT UNSIGNED,
-  `reversed_by_user_id` BIGINT UNSIGNED,
-  `reversal_reason` VARCHAR(255),
-  `initiated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `completed_at` TIMESTAMP NULL,
+  `recipient_account_id` INT,
+  `recipient_bank` VARCHAR(100),
+  `ip_address` VARCHAR(45),
+  `device_info` TEXT,
+  `location` VARCHAR(255),
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `completed_at` TIMESTAMP NULL,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`account_id`) REFERENCES `he_accounts`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`card_id`) REFERENCES `he_cards`(`id`),
-  FOREIGN KEY (`recipient_id`) REFERENCES `he_recipients`(`id`),
-  FOREIGN KEY (`initiated_by_user_id`) REFERENCES `he_users`(`id`),
-  INDEX idx_account_id (`account_id`),
-  INDEX idx_status (`status`),
-  INDEX idx_transaction_type (`transaction_type`),
-  INDEX idx_created_at (`created_at`),
-  INDEX idx_initiated_at (`initiated_at`),
-  INDEX idx_reference_number (`reference_number`),
-  INDEX idx_date_range (`created_at`, `status`)
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_account_id` (`account_id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_created_at` (`created_at`),
+  KEY `idx_type` (`transaction_type`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`card_id`) REFERENCES `cards`(`id`) ON DELETE SET NULL,
+  FOREIGN KEY (`recipient_account_id`) REFERENCES `accounts`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- RECIPIENTS TABLE - Saved transfer recipients
--- ============================================================================
-CREATE TABLE IF NOT EXISTS `he_recipients` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL,
-  `recipient_name` VARCHAR(100) NOT NULL,
-  `recipient_type` ENUM('Internal', 'External', 'Business') DEFAULT 'External',
-  `account_number` VARCHAR(20) NOT NULL,
+-- Beneficiaries table
+CREATE TABLE IF NOT EXISTS `beneficiaries` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `nickname` VARCHAR(100),
+  `account_number` VARCHAR(20) UNIQUE NOT NULL,
+  `bank_name` VARCHAR(100),
   `routing_number` VARCHAR(20),
   `account_holder_name` VARCHAR(100),
-  `bank_name` VARCHAR(255),
-  `swift_code` VARCHAR(20),
-  `iban` VARCHAR(50),
-  `country` VARCHAR(100) DEFAULT 'United States',
+  `account_type` VARCHAR(50),
   `is_verified` BOOLEAN DEFAULT FALSE,
-  `verified_at` TIMESTAMP NULL,
-  `is_favorite` BOOLEAN DEFAULT FALSE,
-  `nickname` VARCHAR(100),
-  `transfer_limit` DECIMAL(15, 2),
-  `daily_limit` DECIMAL(15, 2),
-  `status` ENUM('Active', 'Inactive', 'Blocked') DEFAULT 'Active',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE,
-  INDEX idx_user_id (`user_id`),
-  INDEX idx_status (`status`),
-  INDEX idx_is_favorite (`is_favorite`)
+  KEY `idx_user_id` (`user_id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- RECURRING TRANSFERS TABLE - Automated recurring payments
--- ============================================================================
-CREATE TABLE IF NOT EXISTS `he_recurring_transfers` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL,
-  `from_account_id` BIGINT UNSIGNED NOT NULL,
-  `recipient_id` BIGINT UNSIGNED NOT NULL,
+-- Transfers table
+CREATE TABLE IF NOT EXISTS `transfers` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `from_account_id` INT NOT NULL,
+  `to_account_id` INT,
+  `to_beneficiary_id` INT,
   `amount` DECIMAL(15, 2) NOT NULL,
-  `frequency` ENUM('Daily', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quarterly', 'Annually') NOT NULL,
-  `start_date` DATE NOT NULL,
-  `end_date` DATE,
-  `next_execution_date` DATE NOT NULL,
-  `last_execution_date` DATE,
+  `currency` VARCHAR(3) DEFAULT 'USD',
   `description` VARCHAR(255),
-  `status` ENUM('Active', 'Paused', 'Completed', 'Cancelled') DEFAULT 'Active',
-  `execution_count` INT DEFAULT 0,
-  `failed_execution_count` INT DEFAULT 0,
-  `failed_reason` VARCHAR(255),
-  `requires_approval` BOOLEAN DEFAULT FALSE,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`from_account_id`) REFERENCES `he_accounts`(`id`),
-  FOREIGN KEY (`recipient_id`) REFERENCES `he_recipients`(`id`),
-  INDEX idx_user_id (`user_id`),
-  INDEX idx_next_execution_date (`next_execution_date`),
-  INDEX idx_status (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================================
--- LOANS TABLE - Loan products and accounts
--- ============================================================================
-CREATE TABLE IF NOT EXISTS `he_loans` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL,
-  `loan_type` ENUM('Personal', 'Mortgage', 'Auto', 'Student', 'Home Equity', 'Business') NOT NULL,
-  `loan_number` VARCHAR(20) NOT NULL UNIQUE,
-  `principal_amount` DECIMAL(15, 2) NOT NULL,
-  `current_balance` DECIMAL(15, 2) NOT NULL,
-  `interest_rate` DECIMAL(5, 4) NOT NULL,
-  `annual_percentage_rate` DECIMAL(5, 4),
-  `term_months` INT,
-  `monthly_payment` DECIMAL(15, 2),
-  `start_date` DATE NOT NULL,
-  `maturity_date` DATE,
-  `next_payment_date` DATE,
-  `last_payment_date` DATE,
-  `total_payments_made` INT DEFAULT 0,
-  `remaining_payments` INT,
-  `status` ENUM('Active', 'Paid Off', 'Delinquent', 'Defaulted', 'Cancelled') DEFAULT 'Active',
-  `payment_method` ENUM('Auto-Pay', 'Manual') DEFAULT 'Manual',
-  `auto_pay_account_id` BIGINT UNSIGNED,
-  `late_fees_waived` DECIMAL(15, 2) DEFAULT 0.00,
-  `deferment_available` BOOLEAN DEFAULT FALSE,
-  `forbearance_available` BOOLEAN DEFAULT FALSE,
-  `collateral_description` VARCHAR(255),
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`auto_pay_account_id`) REFERENCES `he_accounts`(`id`),
-  INDEX idx_user_id (`user_id`),
-  INDEX idx_loan_number (`loan_number`),
-  INDEX idx_status (`status`),
-  INDEX idx_next_payment_date (`next_payment_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================================
--- BILLS TABLE - Bill payment management
--- ============================================================================
-CREATE TABLE IF NOT EXISTS `he_bills` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL,
-  `biller_name` VARCHAR(255) NOT NULL,
-  `biller_category` VARCHAR(100),
-  `account_number` VARCHAR(100),
-  `amount` DECIMAL(15, 2),
-  `due_date` DATE,
-  `is_recurring` BOOLEAN DEFAULT FALSE,
-  `frequency` ENUM('One-Time', 'Weekly', 'Bi-Weekly', 'Monthly', 'Quarterly', 'Annually') DEFAULT 'One-Time',
-  `next_due_date` DATE,
-  `last_paid_date` DATE,
-  `status` ENUM('Pending', 'Scheduled', 'Paid', 'Overdue', 'Cancelled') DEFAULT 'Pending',
-  `is_autopay_enabled` BOOLEAN DEFAULT FALSE,
-  `payment_method` ENUM('Account Transfer', 'Card') DEFAULT 'Account Transfer',
-  `payment_from_account_id` BIGINT UNSIGNED,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`payment_from_account_id`) REFERENCES `he_accounts`(`id`),
-  INDEX idx_user_id (`user_id`),
-  INDEX idx_status (`status`),
-  INDEX idx_due_date (`due_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================================
--- SECURITY & AUDIT TABLES
--- ============================================================================
-
--- Login History
-CREATE TABLE IF NOT EXISTS `he_login_history` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL,
-  `ip_address` VARCHAR(45),
-  `user_agent` TEXT,
-  `device_name` VARCHAR(255),
-  `browser` VARCHAR(100),
-  `os` VARCHAR(100),
-  `login_method` ENUM('Username/Password', '2FA SMS', '2FA Email', 'Biometric', 'SSO') DEFAULT 'Username/Password',
-  `status` ENUM('Success', 'Failed', 'Blocked', '2FA Required') DEFAULT 'Success',
+  `transfer_type` ENUM('internal', 'external', 'scheduled', 'recurring') DEFAULT 'internal',
+  `scheduled_date` DATE,
+  `frequency` ENUM('once', 'daily', 'weekly', 'biweekly', 'monthly') DEFAULT 'once',
+  `end_date` DATE,
+  `status` ENUM('pending', 'processing', 'completed', 'failed', 'cancelled') DEFAULT 'pending',
   `failure_reason` VARCHAR(255),
+  `reference_number` VARCHAR(50) UNIQUE,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE,
-  INDEX idx_user_id (`user_id`),
-  INDEX idx_created_at (`created_at`)
+  `completed_at` TIMESTAMP NULL,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_from_account` (`from_account_id`),
+  KEY `idx_to_account` (`to_account_id`),
+  KEY `idx_status` (`status`),
+  FOREIGN KEY (`from_account_id`) REFERENCES `accounts`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`to_account_id`) REFERENCES `accounts`(`id`) ON DELETE SET NULL,
+  FOREIGN KEY (`to_beneficiary_id`) REFERENCES `beneficiaries`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Account Activity Audit Log
-CREATE TABLE IF NOT EXISTS `he_audit_log` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED,
-  `action` VARCHAR(255) NOT NULL,
-  `entity_type` VARCHAR(100),
-  `entity_id` BIGINT UNSIGNED,
+-- Loans table
+CREATE TABLE IF NOT EXISTS `loans` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `loan_type` ENUM('personal', 'auto', 'home', 'student') DEFAULT 'personal',
+  `principal_amount` DECIMAL(15, 2) NOT NULL,
+  `interest_rate` DECIMAL(5, 3) NOT NULL,
+  `term_months` INT NOT NULL,
+  `start_date` DATE,
+  `maturity_date` DATE,
+  `monthly_payment` DECIMAL(10, 2),
+  `balance` DECIMAL(15, 2),
+  `status` ENUM('active', 'paid_off', 'defaulted', 'pending') DEFAULT 'pending',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_status` (`status`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Bills table
+CREATE TABLE IF NOT EXISTS `bills` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `account_id` INT,
+  `biller_name` VARCHAR(100) NOT NULL,
+  `account_number` VARCHAR(50),
+  `bill_amount` DECIMAL(10, 2) NOT NULL,
+  `due_date` DATE,
+  `status` ENUM('pending', 'paid', 'overdue', 'cancelled') DEFAULT 'pending',
+  `frequency` ENUM('once', 'monthly', 'quarterly', 'annual') DEFAULT 'once',
+  `auto_pay_enabled` BOOLEAN DEFAULT FALSE,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_status` (`status`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`account_id`) REFERENCES `accounts`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Notifications table
+CREATE TABLE IF NOT EXISTS `notifications` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `user_id` INT NOT NULL,
+  `title` VARCHAR(255),
+  `message` TEXT,
+  `type` ENUM('transaction', 'security', 'promotion', 'system', 'alert') DEFAULT 'transaction',
+  `is_read` BOOLEAN DEFAULT FALSE,
+  `action_url` VARCHAR(255),
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_is_read` (`is_read`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Audit logs table
+CREATE TABLE IF NOT EXISTS `audit_logs` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `user_id` INT,
+  `action` VARCHAR(100),
+  `resource_type` VARCHAR(50),
+  `resource_id` INT,
   `old_values` JSON,
   `new_values` JSON,
   `ip_address` VARCHAR(45),
-  `user_agent` TEXT,
-  `status` ENUM('Success', 'Failed') DEFAULT 'Success',
-  `description` VARCHAR(255),
+  `user_agent` VARCHAR(255),
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`),
-  INDEX idx_user_id (`user_id`),
-  INDEX idx_entity (`entity_type`, `entity_id`),
-  INDEX idx_action (`action`),
-  INDEX idx_created_at (`created_at`)
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_action` (`action`),
+  KEY `idx_created_at` (`created_at`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Suspicious Activity / Fraud Detection
-CREATE TABLE IF NOT EXISTS `he_fraud_alerts` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL,
-  `alert_type` ENUM('High Value Transaction', 'Unusual Location', 'Unusual Time', 'Multiple Failed Attempts', 'Card Cloning', 'Identity Verification', 'Velocity Check') NOT NULL,
-  `severity` ENUM('Low', 'Medium', 'High', 'Critical') DEFAULT 'Medium',
-  `description` VARCHAR(255),
-  `transaction_id` BIGINT UNSIGNED,
-  `is_resolved` BOOLEAN DEFAULT FALSE,
-  `action_taken` VARCHAR(255),
-  `resolved_at` TIMESTAMP NULL,
+-- Security events table
+CREATE TABLE IF NOT EXISTS `security_events` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `user_id` INT,
+  `event_type` ENUM('login_attempt', 'failed_login', 'password_change', 'card_used', 'suspicious_activity', 'device_added') DEFAULT 'login_attempt',
+  `severity` ENUM('low', 'medium', 'high', 'critical') DEFAULT 'low',
+  `description` TEXT,
+  `ip_address` VARCHAR(45),
+  `device_info` TEXT,
+  `location` VARCHAR(255),
+  `is_verified` BOOLEAN DEFAULT FALSE,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`transaction_id`) REFERENCES `he_transactions`(`id`),
-  INDEX idx_user_id (`user_id`),
-  INDEX idx_severity (`severity`),
-  INDEX idx_is_resolved (`is_resolved`)
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_event_type` (`event_type`),
+  KEY `idx_severity` (`severity`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ============================================================================
--- NOTIFICATIONS & PREFERENCES
--- ============================================================================
+-- Create indexes for performance
+CREATE INDEX idx_accounts_user_status ON `accounts`(`user_id`, `status`);
+CREATE INDEX idx_transactions_account_date ON `transactions`(`account_id`, `created_at`);
+CREATE INDEX idx_transactions_user_date ON `transactions`(`user_id`, `created_at`);
+CREATE INDEX idx_cards_user_status ON `cards`(`user_id`, `status`);
 
-CREATE TABLE IF NOT EXISTS `he_notifications` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL,
-  `notification_type` ENUM('Transaction', 'Security', 'Promotional', 'Alert', 'Reminder') DEFAULT 'Transaction',
-  `title` VARCHAR(255) NOT NULL,
-  `message` TEXT NOT NULL,
-  `icon` VARCHAR(100),
-  `channel` ENUM('In-App', 'Email', 'SMS', 'Push') DEFAULT 'In-App',
-  `is_read` BOOLEAN DEFAULT FALSE,
-  `read_at` TIMESTAMP NULL,
-  `action_url` VARCHAR(255),
-  `priority` ENUM('Low', 'Medium', 'High', 'Urgent') DEFAULT 'Medium',
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `expires_at` TIMESTAMP NULL,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE,
-  INDEX idx_user_id (`user_id`),
-  INDEX idx_is_read (`is_read`),
-  INDEX idx_created_at (`created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- User Notification Preferences
-CREATE TABLE IF NOT EXISTS `he_notification_preferences` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL UNIQUE,
-  `transaction_alerts` BOOLEAN DEFAULT TRUE,
-  `transaction_alerts_channel` SET('Email', 'SMS', 'Push', 'In-App') DEFAULT 'Email,In-App',
-  `security_alerts` BOOLEAN DEFAULT TRUE,
-  `security_alerts_channel` SET('Email', 'SMS', 'Push', 'In-App') DEFAULT 'Email,SMS,In-App',
-  `promotional_emails` BOOLEAN DEFAULT TRUE,
-  `newsletter` BOOLEAN DEFAULT FALSE,
-  `high_transaction_threshold` DECIMAL(15, 2) DEFAULT 5000.00,
-  `alert_unusual_activity` BOOLEAN DEFAULT TRUE,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================================
--- SUPPORT & DOCUMENTS
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS `he_support_tickets` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL,
-  `ticket_number` VARCHAR(20) NOT NULL UNIQUE,
-  `subject` VARCHAR(255) NOT NULL,
-  `category` VARCHAR(100),
-  `description` TEXT NOT NULL,
-  `priority` ENUM('Low', 'Medium', 'High', 'Urgent') DEFAULT 'Medium',
-  `status` ENUM('Open', 'In Progress', 'Waiting for User', 'Resolved', 'Closed') DEFAULT 'Open',
-  `assigned_to_user_id` BIGINT UNSIGNED,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `resolved_at` TIMESTAMP NULL,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`assigned_to_user_id`) REFERENCES `he_users`(`id`),
-  INDEX idx_user_id (`user_id`),
-  INDEX idx_status (`status`),
-  INDEX idx_ticket_number (`ticket_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================================
--- ADMIN & SETTINGS
--- ============================================================================
-
-CREATE TABLE IF NOT EXISTS `he_admin_users` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `user_id` BIGINT UNSIGNED NOT NULL UNIQUE,
-  `role` ENUM('Super Admin', 'Admin', 'Moderator', 'Analyst') DEFAULT 'Admin',
-  `permissions` JSON,
-  `is_active` BOOLEAN DEFAULT TRUE,
-  `last_login_at` TIMESTAMP NULL,
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`user_id`) REFERENCES `he_users`(`id`) ON DELETE CASCADE,
-  INDEX idx_role (`role`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS `he_system_settings` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `setting_key` VARCHAR(255) NOT NULL UNIQUE,
-  `setting_value` JSON,
-  `description` VARCHAR(255),
-  `updated_by_user_id` BIGINT UNSIGNED,
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  FOREIGN KEY (`updated_by_user_id`) REFERENCES `he_users`(`id`),
-  INDEX idx_setting_key (`setting_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================================
--- CREATE INDEXES FOR BETTER PERFORMANCE
--- ============================================================================
-
-CREATE INDEX idx_accounts_user_primary ON `he_accounts`(`user_id`, `is_primary`);
-CREATE INDEX idx_transactions_account_date ON `he_transactions`(`account_id`, `created_at` DESC);
-CREATE INDEX idx_transactions_status_type ON `he_transactions`(`status`, `transaction_type`);
-CREATE INDEX idx_cards_active ON `he_cards`(`user_id`, `card_status`) WHERE card_status = 'Active';
-
--- ============================================================================
--- VIEWS FOR COMMON QUERIES
--- ============================================================================
-
-CREATE OR REPLACE VIEW `vw_user_dashboard` AS
+-- Create views for common queries
+CREATE OR REPLACE VIEW `v_user_summary` AS
 SELECT 
   u.id,
-  u.username,
-  u.email,
   u.first_name,
   u.last_name,
-  COUNT(DISTINCT a.id) as total_accounts,
+  u.email,
+  u.status,
+  COUNT(DISTINCT a.id) as account_count,
   SUM(a.balance) as total_balance,
-  COUNT(DISTINCT c.id) as total_cards,
-  u.last_login_at,
   u.created_at
-FROM `he_users` u
-LEFT JOIN `he_accounts` a ON u.id = a.user_id AND a.status = 'Active'
-LEFT JOIN `he_cards` c ON u.id = c.user_id AND c.card_status = 'Active'
+FROM `users` u
+LEFT JOIN `accounts` a ON u.id = a.user_id
 GROUP BY u.id;
 
-CREATE OR REPLACE VIEW `vw_account_summary` AS
+CREATE OR REPLACE VIEW `v_account_summary` AS
 SELECT 
   a.id,
   a.user_id,
   a.account_number,
   a.account_type,
   a.balance,
-  a.available_balance,
-  a.interest_rate,
-  COUNT(DISTINCT t.id) as transaction_count,
-  MAX(t.created_at) as last_transaction_date,
-  a.status
-FROM `he_accounts` a
-LEFT JOIN `he_transactions` t ON a.id = t.account_id
+  a.status,
+  COUNT(t.id) as transaction_count,
+  MAX(t.created_at) as last_transaction,
+  a.created_at
+FROM `accounts` a
+LEFT JOIN `transactions` t ON a.id = t.account_id
 GROUP BY a.id;
