@@ -1,4 +1,5 @@
 <?php
+// Update Router with accounts & transfers routes
 namespace App\Core;
 
 class Router
@@ -13,6 +14,14 @@ class Router
             '/login' => 'Controllers\\AuthController@loginForm',
             '/login.post' => 'Controllers\\AuthController@login',
             '/logout' => 'Controllers\\AuthController@logout',
+
+            // Accounts
+            '/accounts' => 'Controllers\\AccountsController@index',
+            '/accounts/show' => 'Controllers\\AccountsController@show',
+
+            // Transfers
+            '/transfers/create' => 'Controllers\\TransferController@createForm',
+            '/transfers/create.post' => 'Controllers\\TransferController@create',
         ];
     }
 
